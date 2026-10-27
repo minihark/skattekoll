@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { TaxSettings } from './types';
-import { calculateTaxes } from './utils/taxCalculations';
+import { calculateTaxes, formatSEK } from './utils/taxCalculations';
 import { Navbar } from './components/Navbar';
 import { SafePayoutHero } from './components/SafePayoutHero';
 import { InputControls } from './components/InputControls';
@@ -76,7 +76,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Workspace */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-8 print:hidden">
         
         {/* Hero: Safe Payout & The Three Pots */}
         <SafePayoutHero
@@ -150,6 +150,69 @@ export const App: React.FC = () => {
           </div>
         </div>
       </footer>
+
+      {/* Printable A4 Accountant & K10 Summary */}
+      <div className="hidden print:block p-8 bg-white text-slate-900 space-y-6 font-sans">
+        <div className="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-black uppercase">
+              SKATTEKOLL 2026 — SKATTE- & 3:12 K10-UNDERLAG
+            </h1>
+            <p className="text-sm font-semibold text-slate-600">
+              Kommun: {settings.municipality} ({settings.municipalTaxRate.toFixed(2)}%) • Val: {settings.businessType === 'aktiebolag' ? 'Aktiebolag (AB)' : 'Enskild Firma (EF)'}
+            </p>
+          </div>
+          <div className="text-right font-mono text-xs text-slate-600">
+            <div>Datum: {new Date().toLocaleDateString('sv-SE')}</div>
+            <div>PBB 2026: 58 800 kr • IBB 2026: 80 600 kr</div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-4 font-mono border-b border-slate-300 pb-4">
+          <div className="p-3 border border-slate-300 rounded">
+            <div className="text-[11px] uppercase text-slate-500">Vinst före skatt (Helår)</div>
+            <div className="text-xl font-black">{formatSEK(results.profitBeforeTaxYearly)}</div>
+          </div>
+          <div className="p-3 border border-slate-300 rounded">
+            <div className="text-[11px] uppercase text-slate-500">Netto i handen (Enskild Firma)</div>
+            <div className="text-xl font-black">{formatSEK(results.safeNetPayoutYearly)}</div>
+            <div className="text-[11px] text-slate-500">{formatSEK(results.safeNetPayoutMonthly)}/mån</div>
+          </div>
+          <div className="p-3 border border-slate-300 rounded">
+            <div className="text-[11px] uppercase text-slate-500">Netto i handen (Aktiebolag + K10)</div>
+            <div className="text-xl font-black">{formatSEK(results.abSimulation.netInPocket)}</div>
+            <div className="text-[11px] text-slate-500">
+              Diff vs EF: {results.abSimulation.differenceVsEnskildFirma >= 0 ? '+' : ''}{formatSEK(results.abSimulation.differenceVsEnskildFirma)}/år
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6 text-xs font-mono">
+          <div className="space-y-2 border border-slate-300 rounded p-4">
+            <div className="font-bold text-sm uppercase border-b border-slate-200 pb-1">
+              Enskild Firma (EF) — Helår
+            </div>
+            <div className="flex justify-between"><span>Omsättning (exkl. moms):</span><span>{formatSEK(results.revenueYearly)}</span></div>
+            <div className="flex justify-between"><span>Kostnader (exkl. moms):</span><span>-{formatSEK(results.expensesYearly)}</span></div>
+            <div className="flex justify-between"><span>Egenavgifter:</span><span>-{formatSEK(results.egenavgifter)}</span></div>
+            <div className="flex justify-between"><span>Slutlig inkomstskatt:</span><span>-{formatSEK(results.totalInkomstskatt)}</span></div>
+            <div className="flex justify-between font-bold border-t border-slate-200 pt-1"><span>Säkert uttag (Netto):</span><span>{formatSEK(results.safeNetPayoutYearly)}</span></div>
+            <div className="flex justify-between text-slate-500"><span>Momsreserv (Netto):</span><span>{formatSEK(results.netVatToPay)}</span></div>
+          </div>
+
+          <div className="space-y-2 border border-slate-300 rounded p-4">
+            <div className="font-bold text-sm uppercase border-b border-slate-200 pb-1">
+              Aktiebolag (AB) & 2026 3:12 K10 — Helår
+            </div>
+            <div className="flex justify-between"><span>Bruttolön (upp till brytpunkt):</span><span>{formatSEK(results.abSimulation.salaryYearly)}</span></div>
+            <div className="flex justify-between"><span>Arbetsgivaravgifter (31,42%):</span><span>{formatSEK(results.abSimulation.arbetsgivaravgifter)}</span></div>
+            <div className="flex justify-between"><span>Bolagsskatt (20,6%):</span><span>{formatSEK(results.abSimulation.bolagsskatt)}</span></div>
+            <div className="flex justify-between"><span>K10 Utdelning (Grundbelopp 4 IBB):</span><span>{formatSEK(results.abSimulation.dividends)}</span></div>
+            <div className="flex justify-between"><span>Kapitalskatt på utdelning (20%):</span><span>-{formatSEK(results.abSimulation.dividendTax)}</span></div>
+            <div className="flex justify-between font-bold border-t border-slate-200 pt-1"><span>Totalt netto i handen (Lön + Utd):</span><span>{formatSEK(results.abSimulation.netInPocket)}</span></div>
+          </div>
+        </div>
+      </div>
 
       {/* Modals */}
       <ProModal

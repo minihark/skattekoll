@@ -16,12 +16,14 @@ export const MUNICIPALITIES: Municipality[] = [
 ];
 
 export const PRISBASBELOPP_2026 = 58800;
-export const INKOMSTBASBELOPP_2026 = 76200;
+export const INKOMSTBASBELOPP_2026 = 80600; // Förhöjt IBB för 2026 K10-beräkning (4 IBB = 322 400 kr)
 const STATLIG_SKATT_BRYTPUNKT = 615300; // Brytpunkt för statlig inkomstskatt 20%
 const EGENAVGIFTER_RATE = 0.2897; // 28.97%
 const ARBETSGIVARAVGIFTER_RATE = 0.3142; // 31.42%
 const BOLAGSSKATT_RATE = 0.206; // 20.6%
-const FORENKLINGSREGELN_UTDELNING = 209550; // 3:12 förenklingsregeln schablonbelopp
+export const FORENKLINGSREGELN_OLD_LIMIT = 209550; // Äldre 2.75 IBB
+export const K10_GRUNDBELOPP_2026 = 4 * INKOMSTBASBELOPP_2026; // 322 400 kr (2026 års 3:12-reform: 4 IBB)
+export const K10_LONAVDRAG_2026 = 8 * INKOMSTBASBELOPP_2026; // 644 800 kr (8 IBB avdrag vid lönebaserat utrymme)
 
 /**
  * Calculates Swedish Grundavdrag for 2026 based on earned income
@@ -139,12 +141,13 @@ export function calculateTaxes(settings: TaxSettings): TaxCalculationResult {
     vatReserve: Math.round(netVatToPay / periodDivisor),
   };
 
-  // 6. Aktiebolag Comparison Simulation
+  // 6. Aktiebolag Comparison Simulation (2026 3:12 K10 Reform: Grundbelopp 4 IBB = 322 400 kr)
   // In an AB with same profit: Pay salary up to brytpunkt (~51 275 kr/mån), rest as 3:12 low-tax dividend (20%)
   const abProfit = profitBeforeTaxYearly;
   let abSalary = 0;
   let abArbetsgivaravgifter = 0;
   let abBolagsskatt = 0;
+  let profitAfterTax = 0;
   let abDividends = 0;
   let abDividendTax = 0;
   let abSalaryTaxes = 0;
@@ -167,13 +170,15 @@ export function calculateTaxes(settings: TaxSettings): TaxCalculationResult {
     // Remaining profit in AB taxed at 20.6%
     const remainingProfit = Math.max(0, abProfit - abSalary - abArbetsgivaravgifter);
     abBolagsskatt = Math.round(remainingProfit * BOLAGSSKATT_RATE);
-    const profitAfterTax = Math.max(0, remainingProfit - abBolagsskatt);
+    profitAfterTax = Math.max(0, remainingProfit - abBolagsskatt);
 
-    // Dividends up to förenklingsregeln at 20% tax
-    abDividends = Math.min(FORENKLINGSREGELN_UTDELNING, profitAfterTax);
+    // Dividends up to 2026 Grundbelopp (4 IBB = 322 400 kr) at 20% tax
+    abDividends = Math.min(K10_GRUNDBELOPP_2026, profitAfterTax);
     abDividendTax = Math.round(abDividends * 0.20);
   }
 
+  const k10HuvudregelClassicLimit = Math.round(abSalary * 0.5);
+  const retainedEarningsYearly = Math.max(0, Math.round(profitAfterTax - abDividends));
   const abNetDividends = abDividends - abDividendTax;
   const abNetTotal = Math.round(abNetSalary + abNetDividends);
   const differenceVsEnskildFirma = abNetTotal - safeNetPayoutYearly;
@@ -205,8 +210,13 @@ export function calculateTaxes(settings: TaxSettings): TaxCalculationResult {
       salaryTaxes: abSalaryTaxes,
       arbetsgivaravgifter: abArbetsgivaravgifter,
       bolagsskatt: abBolagsskatt,
+      profitAfterCorporateTax: Math.round(profitAfterTax),
+      k10ForenklingsregelLimit: FORENKLINGSREGELN_OLD_LIMIT,
+      k10Grundbelopp2026Limit: K10_GRUNDBELOPP_2026,
+      k10HuvudregelClassicLimit,
       dividends: Math.round(abDividends),
       dividendTax: abDividendTax,
+      retainedEarningsYearly,
       netInPocket: abNetTotal,
       differenceVsEnskildFirma,
     }

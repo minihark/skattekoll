@@ -56,8 +56,13 @@ export interface TaxCalculationResult {
     salaryTaxes: number;
     arbetsgivaravgifter: number;
     bolagsskatt: number;
+    profitAfterCorporateTax: number;
+    k10ForenklingsregelLimit: number; // 2.75 IBB
+    k10Grundbelopp2026Limit: number; // 4 IBB (2026 reform)
+    k10HuvudregelClassicLimit: number; // 50% av löneunderlag
     dividends: number;
     dividendTax: number;
+    retainedEarningsYearly: number;
     netInPocket: number;
     differenceVsEnskildFirma: number;
   };
