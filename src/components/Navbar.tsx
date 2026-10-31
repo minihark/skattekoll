@@ -1,6 +1,6 @@
 import React from 'react';
 import { TaxSettings, PeriodType, BusinessType } from '../types';
-import { Calculator, Printer, Sparkles, BookOpen, Building2, User, ShieldCheck } from 'lucide-react';
+import { Calculator, Printer, Sparkles, BookOpen, Building2, User, ShieldCheck, FileText } from 'lucide-react';
 
 interface NavbarProps {
   settings: TaxSettings;
@@ -163,6 +163,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Building2 className="w-3.5 h-3.5 text-[#1D4ED8]" />
             <span>3:12 AB-kalkyl</span>
           </button>
+
+          <a
+            href="https://fakturacraft.apps.harkco.se"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E2DA] bg-white hover:bg-[#F8F7F4] text-[#4B5563] hover:text-[#111827] transition shadow-2xs"
+            title="Skapa fakturor med Swish QR & SIE4 i FakturaCraft"
+          >
+            <FileText className="w-3.5 h-3.5 text-[#1E3A8A]" />
+            <span>FakturaCraft ↗</span>
+          </a>
 
           <button
             type="button"
