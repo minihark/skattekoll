@@ -1,6 +1,6 @@
 import React from 'react';
 import { TaxSettings, PeriodType, BusinessType } from '../types';
-import { Calculator, Printer, Sparkles, Check, BookOpen, Building2, User } from 'lucide-react';
+import { Calculator, Printer, Sparkles, BookOpen, Building2, User, ShieldCheck } from 'lucide-react';
 
 interface NavbarProps {
   settings: TaxSettings;
@@ -35,37 +35,39 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 print:hidden">
-      <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+    <header className="sticky top-0 z-40 bg-[#F8F7F4]/90 backdrop-blur-md border-b border-[#E5E2DA] px-4 py-3 print:hidden">
+      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
         
-        {/* Brand */}
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-md shadow-emerald-900/40">
-              <Calculator className="w-4 h-4" />
+        {/* Brand & Identity */}
+        <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-[#14532D] text-white flex items-center justify-center shadow-xs">
+              <Calculator className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-100 tracking-tight">
-                <span>SkatteKoll</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-950 border border-emerald-500/40 text-emerald-400 font-semibold">
-                  2026
+              <div className="flex items-center gap-2">
+                <span className="font-serif text-xl font-bold tracking-tight text-[#111827]">
+                  SkatteKoll
+                </span>
+                <span className="font-mono text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded bg-[#F0FDF4] text-[#14532D] border border-[#BBF7D0]">
+                  2026 Regler
                 </span>
               </div>
-              <div className="text-[10px] text-slate-400">
-                Svensk frilans- & uttagskalkyl
-              </div>
+              <p className="text-[11px] text-[#4B5563] hidden sm:block">
+                Nordisk kalkyl för säkert eget uttag och skattekonto-reserv
+              </p>
             </div>
           </div>
 
-          {/* Period Toggle */}
-          <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+          {/* Period Toggle on mobile */}
+          <div className="flex md:hidden bg-[#E5E2DA]/60 p-1 rounded-lg border border-[#D1CDC2] text-xs font-mono">
             <button
               type="button"
               onClick={() => setPeriod('monthly')}
-              className={`px-3 py-1 rounded-md font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded font-bold transition ${
                 settings.period === 'monthly'
-                  ? 'bg-slate-800 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#111827] shadow-xs'
+                  : 'text-[#4B5563]'
               }`}
             >
               Månad
@@ -73,10 +75,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               type="button"
               onClick={() => setPeriod('yearly')}
-              className={`px-3 py-1 rounded-md font-medium transition-colors ${
+              className={`px-2.5 py-1 rounded font-bold transition ${
                 settings.period === 'yearly'
-                  ? 'bg-slate-800 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-[#111827] shadow-xs'
+                  : 'text-[#4B5563]'
               }`}
             >
               Helår
@@ -84,79 +86,108 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Right Action Controls */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end text-xs">
-          
-          {/* Business Type selector */}
-          <div className="flex bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+        {/* Center / Period Switch for Desktop */}
+        <div className="hidden md:flex items-center gap-2">
+          <div className="flex bg-[#E5E2DA]/60 p-1 rounded-lg border border-[#D1CDC2] text-xs font-mono">
             <button
               type="button"
-              onClick={() => setBusinessType('enskild_firma')}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium transition-colors ${
-                settings.businessType === 'enskild_firma'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-400 hover:text-slate-200'
+              onClick={() => setPeriod('monthly')}
+              className={`px-3 py-1 rounded font-bold transition ${
+                settings.period === 'monthly'
+                  ? 'bg-white text-[#111827] shadow-xs'
+                  : 'text-[#4B5563] hover:text-[#111827]'
               }`}
             >
-              <User className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Enskild Firma</span>
+              Månadsvis
             </button>
-
             <button
               type="button"
-              onClick={() => {
-                setBusinessType('aktiebolag');
-                onOpenABModal();
-              }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md font-medium transition-colors ${
-                settings.businessType === 'aktiebolag'
-                  ? 'bg-slate-800 text-white'
-                  : 'text-slate-400 hover:text-slate-200'
+              onClick={() => setPeriod('yearly')}
+              className={`px-3 py-1 rounded font-bold transition ${
+                settings.period === 'yearly'
+                  ? 'bg-white text-[#111827] shadow-xs'
+                  : 'text-[#4B5563] hover:text-[#111827]'
               }`}
             >
-              <Building2 className="w-3.5 h-3.5 text-teal-400" />
-              <span>Aktiebolag (AB)</span>
+              Helår (365 dagar)
             </button>
           </div>
 
-          {/* Deductions & Dates Guide */}
+          {/* Business Type selector */}
+          <div className="flex bg-[#E5E2DA]/60 p-1 rounded-lg border border-[#D1CDC2] text-xs font-mono">
+            <button
+              type="button"
+              onClick={() => setBusinessType('enskild_firma')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded font-bold transition ${
+                settings.businessType === 'enskild_firma'
+                  ? 'bg-white text-[#111827] shadow-xs'
+                  : 'text-[#4B5563] hover:text-[#111827]'
+              }`}
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>Enskild firma</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setBusinessType('aktiebolag')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded font-bold transition ${
+                settings.businessType === 'aktiebolag'
+                  ? 'bg-white text-[#111827] shadow-xs'
+                  : 'text-[#4B5563] hover:text-[#111827]'
+              }`}
+            >
+              <Building2 className="w-3.5 h-3.5" />
+              <span>Aktiebolag (AB)</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Right Tools & Drawers */}
+        <div className="flex items-center gap-2 w-full md:w-auto justify-end text-xs font-mono">
           <button
             type="button"
             onClick={onOpenDeductionModal}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-750 border border-slate-700 text-slate-200 rounded-lg transition-colors font-medium"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#E5E2DA] bg-white hover:bg-[#F8F7F4] text-[#111827] transition shadow-2xs"
+            title="Skatteverkets schabloner för hemmakontor, milersättning, representation"
           >
-            <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Avdrag & Kalender</span>
+            <BookOpen className="w-3.5 h-3.5 text-[#14532D]" />
+            <span>Avdragsguide</span>
           </button>
 
-          {/* Print / PDF Button */}
+          <button
+            type="button"
+            onClick={onOpenABModal}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#BFDBFE] bg-[#EFF6FF] hover:bg-[#DBEAFE] text-[#1E3A8A] font-bold transition shadow-2xs"
+            title="Jämför enskild firma mot AB med nya 3:12-reglerna 2026"
+          >
+            <Building2 className="w-3.5 h-3.5 text-[#1D4ED8]" />
+            <span>3:12 AB-kalkyl</span>
+          </button>
+
           <button
             type="button"
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-lg transition-colors font-semibold"
-            title="Skriv ut eller spara som PDF"
+            className="p-1.5 rounded-lg border border-[#E5E2DA] bg-white hover:bg-[#F8F7F4] text-[#4B5563] hover:text-[#111827] transition shadow-2xs"
+            title="Skriv ut officiell skattespecifikation eller spara som PDF"
           >
-            <Printer className="w-3.5 h-3.5" />
-            <span>Skriv ut / PDF</span>
+            <Printer className="w-4 h-4" />
           </button>
 
-          {/* Pro Pill */}
           {isPro ? (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 font-semibold text-xs">
-              <Check className="w-3.5 h-3.5" />
-              <span>Pro Aktiv</span>
-            </div>
+            <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#F0FDF4] border border-[#BBF7D0] text-[#14532D] font-bold text-[11px]">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Pro</span>
+            </span>
           ) : (
             <button
               type="button"
               onClick={onOpenProModal}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-400 hover:to-emerald-400 text-slate-950 font-bold shadow-md transition-all active:scale-[0.98]"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#111827] hover:bg-black text-white font-bold text-[11px] transition shadow-xs"
             >
-              <Sparkles className="w-3.5 h-3.5 fill-current" />
-              <span>Uppgradera Pro (149 kr)</span>
+              <Sparkles className="w-3 h-3 text-[#FBBF24]" />
+              <span>Lås upp Pro</span>
             </button>
           )}
-
         </div>
 
       </div>

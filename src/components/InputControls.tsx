@@ -1,6 +1,7 @@
+import React from 'react';
 import { TaxSettings } from '../types';
 import { MUNICIPALITIES, formatSEK } from '../utils/taxCalculations';
-import { Sliders, Sparkles } from 'lucide-react';
+import { Sparkles, Plus } from 'lucide-react';
 
 interface InputControlsProps {
   settings: TaxSettings;
@@ -31,20 +32,29 @@ export const InputControls: React.FC<InputControlsProps> = ({ settings, onChange
     });
   };
 
+  const addExpenseQuick = (amountMonthly: number) => {
+    const delta = isMonthly ? amountMonthly : amountMonthly * 12;
+    update('expenses', Math.max(0, settings.expenses + delta));
+  };
+
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
+    <div className="bg-white border border-[#E5E2DA] rounded-xl p-6 sm:p-7 shadow-xs space-y-6">
       
       {/* Header & Quick Presets */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-slate-800">
-        <div className="flex items-center gap-2 text-sm font-bold text-white">
-          <Sliders className="w-4 h-4 text-emerald-400" />
-          <span>Fyll i dina siffror</span>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#E5E2DA]">
+        <div>
+          <h3 className="font-serif text-lg font-bold text-[#111827]">
+            Fyll i månadens siffror
+          </h3>
+          <p className="text-xs text-[#4B5563]">
+            Alla ändringar uppdaterar kalkylen och de tre säkra potterna i realtid.
+          </p>
         </div>
 
         {/* Preset Chips */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs">
-          <span className="text-[11px] text-slate-400 mr-1 flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-amber-400" />
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+          <span className="text-[11px] text-[#6B7280] mr-1 flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-[#14532D]" />
             Snabbval:
           </span>
           <button
@@ -58,9 +68,9 @@ export const InputControls: React.FC<InputControlsProps> = ({ settings, onChange
                 otherIncome: 0,
               })
             }
-            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors text-[11px]"
+            className="px-2.5 py-1 rounded border border-[#E5E2DA] bg-[#F8F7F4] hover:bg-[#E5E2DA] text-[#111827] font-semibold transition text-[11px]"
           >
-            Frilans (45k)
+            Frilans 45k
           </button>
           <button
             type="button"
@@ -73,9 +83,9 @@ export const InputControls: React.FC<InputControlsProps> = ({ settings, onChange
                 otherIncome: 0,
               })
             }
-            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors text-[11px]"
+            className="px-2.5 py-1 rounded border border-[#E5E2DA] bg-[#F8F7F4] hover:bg-[#E5E2DA] text-[#111827] font-semibold transition text-[11px]"
           >
-            Konsult (85k)
+            Konsult 85k
           </button>
           <button
             type="button"
@@ -88,98 +98,141 @@ export const InputControls: React.FC<InputControlsProps> = ({ settings, onChange
                 otherIncome: 0,
               })
             }
-            className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors text-[11px]"
+            className="px-2.5 py-1 rounded border border-[#E5E2DA] bg-[#F8F7F4] hover:bg-[#E5E2DA] text-[#111827] font-semibold transition text-[11px]"
           >
-            Senior (130k)
+            Senior 130k
           </button>
         </div>
       </div>
 
-      {/* 1. Invoiced Revenue */}
+      {/* Steg 1: Fakturerad intäkt */}
       <div className="space-y-2">
         <div className="flex justify-between items-baseline">
-          <label className="text-xs font-semibold text-slate-200">
-            Fakturerad intäkt (exkl. moms)
+          <label className="text-xs font-mono font-bold text-[#111827] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-full bg-[#14532D] text-white flex items-center justify-center text-[10px]">1</span>
+            <span>Fakturerad intäkt ({isMonthly ? 'per månad' : 'per år'})</span>
           </label>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold font-mono text-emerald-400">
-              {formatSEK(settings.revenue)}
-            </span>
-            <span className="text-xs text-slate-400">/ {isMonthly ? 'mån' : 'år'}</span>
-          </div>
+          <span className="font-mono text-xs font-bold text-[#14532D]">
+            {formatSEK(settings.revenue)} exkl. moms
+          </span>
         </div>
 
-        <input
-          type="range"
-          min={10000}
-          max={isMonthly ? 250000 : 3000000}
-          step={isMonthly ? 1000 : 10000}
-          value={settings.revenue}
-          onChange={(e) => update('revenue', parseFloat(e.target.value) || 0)}
-          className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-        />
-
-        <div className="flex items-center justify-between text-[11px] text-slate-500">
-          <span>{formatSEK(10000)}</span>
+        <div className="relative">
           <input
             type="number"
+            min={0}
+            step={1000}
             value={settings.revenue}
-            onChange={(e) => update('revenue', parseFloat(e.target.value) || 0)}
-            className="w-32 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-right font-mono text-slate-200 focus:border-emerald-500 focus:outline-none"
+            onChange={(e) => update('revenue', Math.max(0, Number(e.target.value) || 0))}
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D1CDC2] bg-[#F8F7F4] font-mono text-lg font-bold text-[#111827] focus:outline-none focus:border-[#14532D] focus:bg-white transition"
+            placeholder="0"
           />
-          <span>{formatSEK(isMonthly ? 250000 : 3000000)}</span>
-        </div>
-      </div>
-
-      {/* 2. Business Expenses */}
-      <div className="space-y-2">
-        <div className="flex justify-between items-baseline">
-          <label className="text-xs font-semibold text-slate-200">
-            Avdragsgilla kostnader (exkl. moms)
-          </label>
-          <div className="flex items-center gap-2">
-            <span className="text-lg font-bold font-mono text-slate-200">
-              {formatSEK(settings.expenses)}
-            </span>
-            <span className="text-xs text-slate-400">/ {isMonthly ? 'mån' : 'år'}</span>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[#6B7280]">
+            SEK exkl. moms
           </div>
         </div>
 
-        <input
-          type="range"
-          min={0}
-          max={isMonthly ? 50000 : 600000}
-          step={isMonthly ? 500 : 5000}
-          value={settings.expenses}
-          onChange={(e) => update('expenses', parseFloat(e.target.value) || 0)}
-          className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-slate-400"
-        />
-
-        <div className="flex items-center justify-between text-[11px] text-slate-500">
-          <span>0 kr</span>
-          <input
-            type="number"
-            value={settings.expenses}
-            onChange={(e) => update('expenses', parseFloat(e.target.value) || 0)}
-            className="w-32 bg-slate-950 border border-slate-800 rounded px-2 py-1 text-right font-mono text-slate-200 focus:border-emerald-500 focus:outline-none"
-          />
-          <span>{formatSEK(isMonthly ? 50000 : 600000)}</span>
+        {/* Momssats väljare */}
+        <div className="flex items-center justify-between text-xs pt-1">
+          <span className="text-[#4B5563]">Moms på din faktura:</span>
+          <div className="flex gap-1 font-mono">
+            {[25, 12, 6, 0].map((rate) => (
+              <button
+                key={rate}
+                type="button"
+                onClick={() => update('vatRate', rate)}
+                className={`px-2 py-0.5 rounded text-[11px] font-bold border transition ${
+                  settings.vatRate === rate
+                    ? 'bg-[#111827] text-white border-[#111827]'
+                    : 'bg-[#F8F7F4] text-[#4B5563] border-[#E5E2DA] hover:border-[#D1CDC2]'
+                }`}
+              >
+                {rate}%
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* 3. Municipality & VAT Settings Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-        
-        {/* Municipality Picker */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-            Kommunalskatt
+      {/* Steg 2: Avdragsgilla kostnader */}
+      <div className="space-y-2 pt-2 border-t border-[#E5E2DA]">
+        <div className="flex justify-between items-baseline">
+          <label className="text-xs font-mono font-bold text-[#111827] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-full bg-[#1E3A8A] text-white flex items-center justify-center text-[10px]">2</span>
+            <span>Avdragsgilla kostnader ({isMonthly ? 'per månad' : 'per år'})</span>
           </label>
-          <div className="flex gap-2">
+          <span className="font-mono text-xs font-bold text-[#4B5563]">
+            {formatSEK(settings.expenses)} exkl. moms
+          </span>
+        </div>
+
+        <div className="relative">
+          <input
+            type="number"
+            min={0}
+            step={500}
+            value={settings.expenses}
+            onChange={(e) => update('expenses', Math.max(0, Number(e.target.value) || 0))}
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#D1CDC2] bg-[#F8F7F4] font-mono text-lg font-bold text-[#111827] focus:outline-none focus:border-[#14532D] focus:bg-white transition"
+            placeholder="0"
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[#6B7280]">
+            SEK exkl. moms
+          </div>
+        </div>
+
+        {/* Quick standard deduction adders */}
+        <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <span className="text-[11px] text-[#6B7280] font-mono">Lägg till standardutlägg:</span>
+          <button
+            type="button"
+            onClick={() => addExpenseQuick(333)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F8F7F4] hover:bg-[#E5E2DA] border border-[#E5E2DA] text-[#111827] text-[11px] font-mono transition"
+            title="Skatteverkets schablon för hemmakontor (ca 4 000 kr/år)"
+          >
+            <Plus className="w-3 h-3 text-[#14532D]" />
+            <span>Hemmakontor (+333 kr)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => addExpenseQuick(500)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F8F7F4] hover:bg-[#E5E2DA] border border-[#E5E2DA] text-[#111827] text-[11px] font-mono transition"
+            title="Arbetsmobil & bredband (500 kr/mån)"
+          >
+            <Plus className="w-3 h-3 text-[#14532D]" />
+            <span>Mobil/Bredband (+500 kr)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => addExpenseQuick(1500)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-[#F8F7F4] hover:bg-[#E5E2DA] border border-[#E5E2DA] text-[#111827] text-[11px] font-mono transition"
+            title="Dator & mjukvarulicenser (1 500 kr/mån)"
+          >
+            <Plus className="w-3 h-3 text-[#14532D]" />
+            <span>Programvara (+1 500 kr)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Steg 3: Kommun & Skatteunderlag */}
+      <div className="space-y-3 pt-3 border-t border-[#E5E2DA]">
+        <div className="flex items-center justify-between">
+          <label className="text-xs font-mono font-bold text-[#111827] uppercase tracking-wider flex items-center gap-1.5">
+            <span className="w-5 h-5 rounded-full bg-[#4B5563] text-white flex items-center justify-center text-[10px]">3</span>
+            <span>Hemkommun & Skattesats</span>
+          </label>
+          <span className="text-xs font-mono font-bold text-[#111827]">
+            {settings.municipalTaxRate.toFixed(2)}%
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
             <select
               value={settings.municipality}
               onChange={(e) => {
-                const found = MUNICIPALITIES.find((m) => m.name === e.target.value);
+                const name = e.target.value;
+                const found = MUNICIPALITIES.find((m) => m.name === name);
                 if (found) {
                   onChange({
                     ...settings,
@@ -188,70 +241,51 @@ export const InputControls: React.FC<InputControlsProps> = ({ settings, onChange
                   });
                 }
               }}
-              className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:border-emerald-500 focus:outline-none"
+              className="w-full px-3 py-2 rounded-lg border border-[#D1CDC2] bg-[#F8F7F4] text-xs font-mono font-bold text-[#111827] focus:outline-none focus:border-[#14532D] focus:bg-white transition"
             >
               {MUNICIPALITIES.map((m) => (
                 <option key={m.name} value={m.name}>
-                  {m.name} ({m.taxRate}%)
+                  {m.name} ({m.taxRate.toFixed(2)}%)
                 </option>
               ))}
             </select>
-            <input
-              type="number"
-              step="0.01"
-              value={settings.municipalTaxRate}
-              onChange={(e) => update('municipalTaxRate', parseFloat(e.target.value) || 32)}
-              className="w-20 bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs font-mono text-center text-slate-200 focus:border-emerald-500 focus:outline-none"
-            />
+          </div>
+
+          <div>
+            <div className="relative">
+              <input
+                type="number"
+                step="0.01"
+                min="20"
+                max="40"
+                value={settings.municipalTaxRate}
+                onChange={(e) => update('municipalTaxRate', Number(e.target.value) || 30.0)}
+                className="w-full px-3 py-2 rounded-lg border border-[#D1CDC2] bg-[#F8F7F4] text-xs font-mono font-bold text-[#111827] focus:outline-none focus:border-[#14532D] focus:bg-white transition"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-[#6B7280]">
+                % skatt
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* VAT Rate */}
-        <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-            Moms på din försäljning
-          </label>
-          <div className="flex gap-2">
-            {[25, 12, 6, 0].map((rate) => (
-              <button
-                key={rate}
-                type="button"
-                onClick={() => update('vatRate', rate)}
-                className={`flex-1 py-2 rounded-lg border text-xs font-medium transition-all ${
-                  settings.vatRate === rate
-                    ? 'bg-emerald-950/80 border-emerald-500 text-emerald-300'
-                    : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                {rate}%
-              </button>
-            ))}
+        {/* Schablonavdrag checkbox */}
+        <div className="flex items-center justify-between p-3 rounded-lg bg-[#F8F7F4] border border-[#E5E2DA] text-xs">
+          <div>
+            <div className="font-bold text-[#111827]">
+              25% Schablonavdrag för egenavgifter
+            </div>
+            <div className="text-[11px] text-[#4B5563]">
+              Standard i svensk preliminärdeklaration (minskar underlaget för egenavgifter).
+            </div>
           </div>
+          <input
+            type="checkbox"
+            checked={settings.includeSchablonavdrag}
+            onChange={(e) => update('includeSchablonavdrag', e.target.checked)}
+            className="w-4 h-4 accent-[#14532D] rounded cursor-pointer"
+          />
         </div>
-
-      </div>
-
-      {/* 4. Other Salary / Employment Income */}
-      <div className="pt-2 border-t border-slate-800">
-        <div className="flex items-center justify-between mb-1">
-          <label className="text-xs font-medium text-slate-400">
-            Annan anställningsinkomst (per år)
-          </label>
-          <span className="text-[11px] font-mono text-slate-400">
-            {formatSEK(settings.otherIncomeYearly)}
-          </span>
-        </div>
-        <p className="text-[10px] text-slate-500 mb-2">
-          Om du har vanlig anställning vid sidan om firman påverkar det när du når brytpunkten för statlig inkomstskatt (615 300 kr).
-        </p>
-        <input
-          type="number"
-          step="5000"
-          value={settings.otherIncomeYearly}
-          onChange={(e) => update('otherIncomeYearly', parseFloat(e.target.value) || 0)}
-          placeholder="t.ex. 360 000 kr"
-          className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs font-mono text-slate-200 focus:border-emerald-500 focus:outline-none"
-        />
       </div>
 
     </div>

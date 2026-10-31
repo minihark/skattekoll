@@ -6,7 +6,7 @@ import {
   K10_GRUNDBELOPP_2026,
   K10_LONAVDRAG_2026,
 } from '../utils/taxCalculations';
-import { X, Building2, TrendingUp, ShieldCheck, Printer, Copy, Check, Sparkles } from 'lucide-react';
+import { X, Building2, Copy, Check } from 'lucide-react';
 
 interface ABComparisonModalProps {
   isOpen: boolean;
@@ -21,8 +21,8 @@ export const ABComparisonModal: React.FC<ABComparisonModalProps> = ({
   results,
   period,
 }) => {
-  const [ownershipPct, setOwnershipPct] = useState<number>(100);
-  const [extraPayrollYearly, setExtraPayrollYearly] = useState<number>(0);
+  const [ownershipPct] = useState<number>(100);
+  const [extraPayrollYearly] = useState<number>(0);
   const [copiedSummary, setCopiedSummary] = useState<boolean>(false);
 
   if (!isOpen) return null;
@@ -45,8 +45,6 @@ export const ABComparisonModal: React.FC<ABComparisonModalProps> = ({
     Math.round(0.5 * (totalCompanyPayroll * share - K10_LONAVDRAG_2026 * share))
   );
   const totalReform2026Space = grundbelopp2026Space + lonebaseratTillägg2026;
-  // 4. Classic Huvudregel (50% of payroll when salary requirement met)
-  const classicHuvudregelSpace = Math.round(0.5 * totalCompanyPayroll * share);
 
   const handleCopyK10 = async () => {
     const summary = [
@@ -69,265 +67,155 @@ export const ABComparisonModal: React.FC<ABComparisonModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto print:hidden">
-      <div className="relative w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden text-slate-100 my-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-150 overflow-y-auto print:hidden">
+      <div className="relative w-full max-w-3xl bg-white border border-[#D1CDC2] rounded-xl shadow-xl overflow-hidden text-[#111827] my-6 flex flex-col">
         
-        {/* Banner */}
-        <div className="bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600 p-6 text-white relative">
+        {/* Header */}
+        <div className="bg-[#F8F7F4] p-6 border-b border-[#E5E2DA] relative shrink-0">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-1.5 rounded-full bg-black/20 hover:bg-black/40 text-white/80 hover:text-white transition-colors"
+            className="absolute top-4 right-4 p-1.5 rounded-lg border border-[#E5E2DA] bg-white hover:bg-[#F8F7F4] text-[#4B5563] hover:text-[#111827] transition"
           >
             <X className="w-5 h-5" />
           </button>
 
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase tracking-wider backdrop-blur-md mb-2">
-            <Building2 className="w-3.5 h-3.5" />
-            <span>Företagsforms- & 3:12 K10-Studio (2026)</span>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="px-2.5 py-0.5 rounded bg-[#EFF6FF] border border-[#BFDBFE] text-[#1E3A8A] text-xs font-mono font-bold uppercase tracking-wider">
+              3:12 Reformen 2026
+            </span>
           </div>
 
-          <h2 className="text-2xl font-bold tracking-tight">
-            Enskild Firma vs Aktiebolag + Nya 3:12-reglerna
+          <h2 className="font-serif text-2xl font-bold tracking-tight text-[#111827]">
+            Enskild Firma vs Aktiebolag (AB)
           </h2>
-          <p className="text-teal-100 text-xs sm:text-sm mt-1 max-w-2xl">
-            Jämför netto i handen samt ditt lågbeskattade K10-utdelningsutrymme (20% skatt) enligt 2026 års 3:12-reform (Grundbelopp 4 IBB = 322 400 kr).
+          <p className="text-xs text-[#4B5563] mt-1">
+            Realtidsjämförelse baserad på brytpunkt för statlig skatt (615 300 kr) och 20% schablonutdelning.
           </p>
         </div>
 
-        <div className="p-6 space-y-6 max-h-[80vh] overflow-y-auto">
+        {/* Content */}
+        <div className="p-6 overflow-y-auto space-y-6 flex-1 bg-white">
           
-          {/* Winner comparison banner */}
-          <div className="p-4 rounded-xl bg-teal-950/50 border border-teal-500/40 flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="text-xs font-medium text-teal-300">
-                  {isAdvantage ? 'Ekonomisk fördel med Aktiebolag (inkl. 2026 K10)' : 'Enskild Firma är förmånligast vid nuvarande vinstnivå'}
-                </div>
-                <div className="text-2xl font-black font-mono text-white">
-                  {isAdvantage ? `+${p(ab.differenceVsEnskildFirma)}` : '0 kr extra'}
-                  <span className="text-xs font-normal text-slate-400 ml-1">
-                    ({period === 'monthly' ? 'per månad' : 'per år'})
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleCopyK10}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-teal-500/40 text-teal-200 text-xs font-semibold transition"
-              >
-                {copiedSummary ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                <span>{copiedSummary ? 'Kopierat!' : 'Kopiera K10'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-500 hover:bg-teal-400 text-slate-950 text-xs font-bold transition"
-              >
-                <Printer className="w-3.5 h-3.5" />
-                <span>Revisors-PDF</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Side-by-side breakdown */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          {/* Comparison Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {/* Enskild Firma */}
-            <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 space-y-3">
-              <div className="font-bold text-slate-200 text-sm border-b border-slate-800 pb-2">
-                Enskild Firma
+            {/* Enskild Firma Card */}
+            <div className="p-5 rounded-xl border border-[#E5E2DA] bg-[#F8F7F4]/60 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-[#111827]">Enskild Firma</span>
+                <span className="text-[11px] font-mono text-[#4B5563]">Nuvarande form</span>
               </div>
 
-              <div className="space-y-1.5 text-slate-400">
+              <div>
+                <div className="text-[11px] text-[#6B7280]">Netto i plånboken ({period === 'monthly' ? 'per månad' : 'per år'})</div>
+                <div className="text-2xl font-black font-mono text-[#111827] mt-0.5">
+                  {p(results.safeNetPayoutYearly)}
+                </div>
+              </div>
+
+              <div className="text-xs text-[#4B5563] space-y-1 pt-2 border-t border-[#E5E2DA]">
                 <div className="flex justify-between">
-                  <span>Vinst före skatt:</span>
-                  <span className="font-mono text-white">{p(results.profitBeforeTaxYearly)}</span>
-                </div>
-                <div className="flex justify-between text-blue-400">
                   <span>Egenavgifter:</span>
-                  <span className="font-mono">-{p(results.egenavgifter)}</span>
+                  <span className="font-mono">{p(results.egenavgifter)}</span>
                 </div>
-                <div className="flex justify-between text-red-400">
+                <div className="flex justify-between">
                   <span>Inkomstskatt:</span>
-                  <span className="font-mono">-{p(results.totalInkomstskatt)}</span>
+                  <span className="font-mono">{p(results.totalInkomstskatt)}</span>
                 </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-emerald-400 text-sm">
-                <span>Netto i handen:</span>
-                <span className="font-mono">{p(results.safeNetPayoutYearly)}</span>
               </div>
             </div>
 
-            {/* Aktiebolag */}
-            <div className="p-4 rounded-xl bg-slate-950/70 border border-teal-500/40 space-y-3 relative">
-              <div className="font-bold text-teal-300 text-sm border-b border-slate-800 pb-2 flex items-center justify-between">
-                <span>Aktiebolag (AB)</span>
-                <span className="text-[10px] bg-teal-950 border border-teal-500/40 text-teal-300 px-1.5 py-0.5 rounded font-mono">
-                  3:12 (4 IBB)
-                </span>
-              </div>
-
-              <div className="space-y-1.5 text-slate-400">
-                <div className="flex justify-between">
-                  <span>Netto lön (upp till brytpunkt):</span>
-                  <span className="font-mono text-white">{p(ab.salaryYearly - ab.salaryTaxes)}</span>
-                </div>
-                <div className="flex justify-between text-purple-400">
-                  <span>Utdelning (20% skatt):</span>
-                  <span className="font-mono">+{p(ab.dividends - ab.dividendTax)}</span>
-                </div>
-                <div className="flex justify-between text-slate-500 text-[10px]">
-                  <span>(Bolagsskatt 20.6% betald)</span>
-                  <span className="font-mono">{p(ab.bolagsskatt)}</span>
-                </div>
-                {ab.retainedEarningsYearly > 0 && (
-                  <div className="flex justify-between text-amber-300/90 text-[11px]">
-                    <span>Kvar i bolaget (balanserad vinst):</span>
-                    <span className="font-mono">{p(ab.retainedEarningsYearly)}</span>
-                  </div>
+            {/* Aktiebolag Card */}
+            <div className={`p-5 rounded-xl border space-y-3 ${
+              isAdvantage
+                ? 'border-[#BBF7D0] bg-[#F0FDF4]/70'
+                : 'border-[#E5E2DA] bg-[#F8F7F4]/60'
+            }`}>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-sm text-[#111827]">Aktiebolag (AB)</span>
+                {isAdvantage && (
+                  <span className="text-[11px] font-mono font-bold text-[#14532D] bg-[#DCFCE7] px-2 py-0.5 rounded">
+                    +{p(ab.differenceVsEnskildFirma)} mer netto!
+                  </span>
                 )}
               </div>
 
-              <div className="pt-2 border-t border-slate-800 flex justify-between font-bold text-teal-300 text-sm">
-                <span>Totalt netto i handen:</span>
-                <span className="font-mono">{p(ab.netInPocket)}</span>
+              <div>
+                <div className="text-[11px] text-[#14532D]">Netto i plånboken (Lön + 20% Utdelning)</div>
+                <div className="text-2xl font-black font-mono text-[#14532D] mt-0.5">
+                  {p(ab.netInPocket)}
+                </div>
+              </div>
+
+              <div className="text-xs text-[#4B5563] space-y-1 pt-2 border-t border-[#E5E2DA]">
+                <div className="flex justify-between">
+                  <span>Årslön i AB:</span>
+                  <span className="font-mono">{formatSEK(ab.salaryYearly)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Årlig utdelning (20% skatt):</span>
+                  <span className="font-mono">{formatSEK(ab.dividends)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Bolagsskatt (20.6%):</span>
+                  <span className="font-mono">{formatSEK(ab.bolagsskatt)}</span>
+                </div>
               </div>
             </div>
 
           </div>
 
-          {/* 2026 3:12 K10 Scenario Comparator */}
-          <div className="p-4 rounded-xl bg-slate-950/90 border border-emerald-500/30 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-400" />
-                <h3 className="text-sm font-bold text-white">
-                  3:12 K10-Jämförare: Förenklingsregel vs 2026 Grundbelopp (4 IBB) & Löneunderlag
-                </h3>
+          {/* 3:12 K10 Gränsbelopp Specs */}
+          <div className="p-5 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF]/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="font-bold text-sm text-[#1E3A8A] flex items-center gap-1.5">
+                <Building2 className="w-4 h-4 text-[#1D4ED8]" />
+                <span>Nya 3:12-reglerna 2026 (K10 Blankett)</span>
               </div>
-              <span className="text-[11px] font-mono text-emerald-300 bg-emerald-950/80 border border-emerald-500/30 px-2 py-0.5 rounded">
-                IBB 2026: 80 600 kr
+              <span className="text-[11px] font-mono font-semibold text-[#1E3A8A]">
+                1 IBB 2026 = 80 600 kr
               </span>
             </div>
 
-            {/* Interactive Controls for Ownership % and Extra Payroll */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-900/80 p-3 rounded-xl border border-slate-800">
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-slate-300 font-medium">
-                  <span>Din ägarandel i bolaget:</span>
-                  <span className="font-mono font-bold text-emerald-400">{ownershipPct}%</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {[25, 50, 100].map((pct) => (
-                    <button
-                      key={pct}
-                      type="button"
-                      onClick={() => setOwnershipPct(pct)}
-                      className={`flex-1 py-1 rounded font-mono text-xs font-bold transition ${
-                        ownershipPct === pct
-                          ? 'bg-emerald-500 text-slate-950'
-                          : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                      }`}
-                    >
-                      {pct}%
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <p className="text-xs text-[#4B5563] leading-relaxed">
+              Från 2026 höjs schablongränsbeloppet (förenklingsregeln) från 2,75 IBB till <strong>4 IBB ({formatSEK(K10_GRUNDBELOPP_2026)})</strong>. Dessutom får du räkna lönebaserat utrymme för anställda utan spärregler.
+            </p>
 
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-slate-300 font-medium">
-                  <span>Övriga löner i AB (anställda/helår):</span>
-                  <span className="font-mono font-bold text-teal-300">{formatSEK(extraPayrollYearly)}</span>
-                </div>
-                <div className="flex gap-1.5">
-                  {[0, 600000, 1200000, 2400000].map((sal) => (
-                    <button
-                      key={sal}
-                      type="button"
-                      onClick={() => setExtraPayrollYearly(sal)}
-                      className={`flex-1 py-1 rounded font-mono text-[11px] font-bold transition ${
-                        extraPayrollYearly === sal
-                          ? 'bg-teal-400 text-slate-950'
-                          : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
-                      }`}
-                    >
-                      {sal === 0 ? '0 kr' : `${sal / 1000}k`}
-                    </button>
-                  ))}
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 text-xs font-mono">
+              <div className="p-2.5 rounded-lg bg-white border border-[#E5E2DA]">
+                <div className="text-[10px] text-[#6B7280]">Äldre förenklingsregel (2,75 IBB)</div>
+                <div className="text-sm font-bold text-[#111827] mt-0.5">{formatSEK(oldForenklingSpace)}</div>
               </div>
-            </div>
-
-            {/* 3-Column Rule Comparison Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900/70 border border-slate-800 space-y-1.5">
-                <div className="text-[11px] font-semibold text-slate-400">
-                  Äldre Förenklingsregel (2,75 IBB)
-                </div>
-                <div className="text-lg font-black font-mono text-slate-200">
-                  {formatSEK(oldForenklingSpace)}
-                </div>
-                <div className="text-[11px] text-slate-400">
-                  Netto efter 20% skatt:{' '}
-                  <strong className="text-white font-mono">{formatSEK(oldForenklingSpace * 0.8)}</strong>
-                </div>
+              <div className="p-2.5 rounded-lg bg-white border border-[#BFDBFE]">
+                <div className="text-[10px] text-[#1E3A8A]">Nya 2026 Grundbelopp (4 IBB)</div>
+                <div className="text-sm font-bold text-[#1E3A8A] mt-0.5">{formatSEK(grundbelopp2026Space)}</div>
               </div>
-
-              <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/40 space-y-1.5">
-                <div className="text-[11px] font-bold text-emerald-300 flex items-center justify-between">
-                  <span>Nya Grundbelopp (4 IBB)</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
-                    +{formatSEK(grundbelopp2026Space - oldForenklingSpace)}
-                  </span>
-                </div>
-                <div className="text-lg font-black font-mono text-emerald-300">
-                  {formatSEK(grundbelopp2026Space)}
-                </div>
-                <div className="text-[11px] text-slate-300">
-                  Netto efter 20% skatt:{' '}
-                  <strong className="text-emerald-300 font-mono">{formatSEK(grundbelopp2026Space * 0.8)}</strong>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-teal-950/30 border border-teal-500/40 space-y-1.5">
-                <div className="text-[11px] font-bold text-teal-300">
-                  2026 Grund + Lönebaserat (50% &gt; 8 IBB)
-                </div>
-                <div className="text-lg font-black font-mono text-teal-200">
-                  {formatSEK(totalReform2026Space)}
-                </div>
-                <div className="text-[11px] text-slate-300">
-                  Netto efter 20% skatt:{' '}
-                  <strong className="text-teal-300 font-mono">{formatSEK(totalReform2026Space * 0.8)}</strong>
-                  <div className="text-[10px] text-slate-500 mt-0.5">
-                    (Klassisk 50% löneregel: {formatSEK(classicHuvudregelSpace)})
-                  </div>
-                </div>
+              <div className="p-2.5 rounded-lg bg-white border border-[#BBF7D0]">
+                <div className="text-[10px] text-[#14532D]">Inkl. lönebaserat utrymme</div>
+                <div className="text-sm font-bold text-[#14532D] mt-0.5">{formatSEK(totalReform2026Space)}</div>
               </div>
             </div>
           </div>
 
-          {/* Key Takeaway */}
-          <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800 text-xs text-slate-300 space-y-2">
-            <div className="font-bold text-white flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              <span>Sammanfattning av 2026 års 3:12-reform (K10)</span>
-            </div>
-            <ul className="space-y-1 text-slate-400 text-[11px] list-disc list-inside">
-              <li><strong>Grundbeloppet höjs till 4 IBB (322 400 kr/år)</strong> från tidigare 2,75 IBB (209 550 kr) — helt utan löneuttagskrav.</li>
-              <li><strong>Slopat löneuttagskrav för lönebaserat utrymme:</strong> Alla delägare får räkna 50% av sin andel av bolagets löner över 8 IBB (644 800 kr) ovanpå grundbeloppet.</li>
-              <li>När din vinst överstiger <strong>~55 000 – 65 000 kr/månad</strong> ger Aktiebolag en tydlig skattefördel via 20% utdelningsskatt.</li>
-            </ul>
-          </div>
+        </div>
 
+        {/* Footer */}
+        <div className="p-4 bg-[#F8F7F4] border-t border-[#E5E2DA] flex items-center justify-between text-xs font-mono">
+          <button
+            type="button"
+            onClick={handleCopyK10}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E2DA] bg-white hover:bg-[#F8F7F4] text-[#111827] font-semibold transition"
+          >
+            {copiedSummary ? <Check className="w-3.5 h-3.5 text-[#14532D]" /> : <Copy className="w-3.5 h-3.5 text-[#6B7280]" />}
+            <span>{copiedSummary ? 'Kopierat!' : 'Kopiera K10-sammanfattning'}</span>
+          </button>
+
+          <button
+            onClick={onClose}
+            className="px-4 py-1.5 rounded-lg bg-[#111827] hover:bg-black text-white font-bold transition"
+          >
+            Stäng
+          </button>
         </div>
 
       </div>
