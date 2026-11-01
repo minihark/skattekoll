@@ -147,8 +147,24 @@ export const App: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-[#6B7280]">
-            <span>Skatteverket Inkomstår 2026</span>
+          <div className="flex items-center gap-3 text-[#6B7280]">
+            <a
+              href="https://vakt.apps.harkco.se"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="SkatteKoll Status på Harkco Vakt"
+              className="inline-block hover:opacity-90 transition-opacity"
+            >
+              <img
+                src="https://vakt.apps.harkco.se/badge/skattekoll.svg"
+                alt="SkatteKoll: operational"
+                height="20"
+                className="h-5 inline-block"
+                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+              />
+            </a>
+            <span>•</span>
+            <span>Skatteverket 2026</span>
             <span>•</span>
             <span>Harkco Studio</span>
           </div>

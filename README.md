@@ -2,6 +2,8 @@
 
 **Blixtsnabb skatte- och uttagskalkylator för svenska enskilda firmor och konsulter.**
 
+[![SkatteKoll Uptime](https://vakt.apps.harkco.se/badge/skattekoll.svg?metric=uptime)](https://vakt.apps.harkco.se)
+
 Live App: [https://skattekoll.apps.harkco.se](https://skattekoll.apps.harkco.se)
 
 ---
